@@ -1,0 +1,86 @@
+
+import tkinter as tk
+from tkinter import filedialog, messagebox
+#from sentryfile import analyze_file
+
+#report = analyze_file("evidence.jpg")
+#print(report["status"], report["risk_score"])
+#for flag in report["flags"]:    print(flag["code"], "-", flag["details"])
+
+#from document_analysis import extract_text
+#from metadata_checker import check_metadata
+#from ela_detector import ela_analysis
+#from fake_news_model import detect_fake_news
+#from report_generator import generate_report
+
+selected_file = None
+
+def load_file():
+    global selected_file
+    selected_file = filedialog.askopenfilename()
+    file_label.config(text=selected_file)
+
+def run_analysis():
+
+    if not selected_file:
+        messagebox.showwarning("Error", "Select a document first")
+        return
+
+    text = extract_text(selected_file)
+    metadata = check_metadata(selected_file)
+    ela = ela_analysis(selected_file)
+
+    result_text.delete(1.0, tk.END)
+
+    result_text.insert(tk.END, "===== OCR TEXT =====\n")
+    result_text.insert(tk.END, text + "\n\n")
+
+    result_text.insert(tk.END, "===== METADATA =====\n")
+    result_text.insert(tk.END, str(metadata) + "\n\n")
+
+    result_text.insert(tk.END, "===== ELA RESULT =====\n")
+    result_text.insert(tk.END, str(ela) + "\n\n")
+
+def analyze_news():
+    article = news_box.get("1.0", tk.END)
+    result = detect_fake_news(article)
+
+    result_text.insert(tk.END, "\n===== NEWS ANALYSIS =====\n")
+    result_text.insert(tk.END, result)
+
+def create_report():
+    content = result_text.get("1.0", tk.END)
+    generate_report(content)
+    messagebox.showinfo("Report", "Report Generated")
+
+root = tk.Tk()
+root.title("Fake News Investigation Tool v1.9.0 By Mugisa JOhn")
+root.geometry("900x650")
+
+title = tk.Label(root, text="FAKE NEWS DETECTION TOOL UG. ", font=("Tahoma",18))
+title.pack()
+
+load_btn = tk.Button(root, text="Load Document", command=load_file)
+load_btn.pack()
+
+file_label = tk.Label(root, text="No file selected")
+file_label.pack()
+
+analyze_btn = tk.Button(root, text="Analyze Document", command=run_analysis)
+analyze_btn.pack()
+
+tk.Label(root, text="Paste News Article").pack()
+
+news_box = tk.Text(root, height=6)
+news_box.pack()
+
+news_btn = tk.Button(root, text="Detect Fake News", command=analyze_news)
+news_btn.pack()
+
+result_text = tk.Text(root, height=20)
+result_text.pack()
+
+report_btn = tk.Button(root, text="Generate Investigation Report", command=create_report)
+report_btn.pack()
+
+root.mainloop()
